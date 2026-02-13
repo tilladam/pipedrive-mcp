@@ -18,7 +18,7 @@ if os.getenv("CONTAINER_MODE", "false").lower() == "true":
 # Create the FastMCP instance
 mcp = FastMCP(
     "mcp-pipedrive",
-    description="MCP server for Pipedrive API v2",
+    instructions="MCP server for Pipedrive API v2",
     lifespan=pipedrive_lifespan,
     host=os.getenv("HOST", default_host),
     port=int(os.getenv("PORT", "8152")),
