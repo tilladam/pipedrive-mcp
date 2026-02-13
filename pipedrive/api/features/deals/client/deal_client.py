@@ -865,3 +865,67 @@ class DealClient:
         except Exception as e:
             logger.error(f"Error in delete_product_from_deal: {str(e)}")
             raise
+
+    async def get_deal_labels(self) -> List[Dict[str, Any]]:
+        """
+        Get all available deal labels by reading the 'label' deal field options.
+
+        Returns:
+            List of label option dicts with id, label, and optionally color
+
+        Raises:
+            PipedriveAPIError: If the API call fails
+        """
+        logger.info("DealClient: Fetching deal labels from dealFields")
+
+        # Fetch deal fields and find the label field
+        response_data = await self.base_client.request(
+            "GET",
+            "/dealFields",
+            query_params={"limit": 500},
+        )
+
+        fields = response_data.get("data", []) or []
+        for field in fields:
+            if field.get("key") == "label":
+                options = field.get("options", []) or []
+                logger.info(f"DealClient: Found {len(options)} deal labels")
+                return options
+
+        logger.warning("DealClient: No 'label' field found in deal fields")
+        return []
+
+    async def create_deal_label(self, label: str) -> Dict[str, Any]:
+        """
+        Create a new deal label option.
+
+        Args:
+            label: Display name for the new label (1-255 characters)
+
+        Returns:
+            Created label option dict with id and label
+
+        Raises:
+            PipedriveAPIError: If the API call fails
+            ValueError: If input validation fails
+        """
+        if not label or not label.strip():
+            raise ValueError("Label name cannot be empty")
+
+        if len(label) > 255:
+            raise ValueError("Label name must be 255 characters or fewer")
+
+        logger.info(f"DealClient: Creating deal label '{label}'")
+
+        response_data = await self.base_client.request(
+            "POST",
+            "/dealFields/label/options",
+            json_payload=[{"label": label.strip()}],
+        )
+
+        created_options = response_data.get("data", []) or []
+        if created_options:
+            logger.info(f"DealClient: Created deal label with ID {created_options[0].get('id')}")
+            return created_options[0]
+
+        return {}

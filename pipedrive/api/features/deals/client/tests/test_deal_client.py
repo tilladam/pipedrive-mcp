@@ -567,3 +567,105 @@ class TestDealClient:
         mock_base_client.request.assert_called_once_with(
             "DELETE", "/deals/456/products/123"
         )
+
+    # --- Deal Label Methods ---
+
+    @pytest.mark.asyncio
+    async def test_get_deal_labels_success(self, deal_client, mock_base_client):
+        """Test get_deal_labels returns label options from the label field"""
+        mock_base_client.request.return_value = {
+            "success": True,
+            "data": [
+                {"key": "title", "field_type": "varchar", "options": None},
+                {
+                    "key": "label",
+                    "field_type": "enum",
+                    "options": [
+                        {"id": 1, "label": "Hot"},
+                        {"id": 2, "label": "Cold"},
+                    ],
+                },
+                {"key": "value", "field_type": "double", "options": None},
+            ],
+        }
+
+        result = await deal_client.get_deal_labels()
+
+        mock_base_client.request.assert_called_once_with(
+            "GET", "/dealFields", query_params={"limit": 500}
+        )
+        assert len(result) == 2
+        assert result[0]["label"] == "Hot"
+        assert result[1]["id"] == 2
+
+    @pytest.mark.asyncio
+    async def test_get_deal_labels_no_label_field(self, deal_client, mock_base_client):
+        """Test get_deal_labels returns empty list when no label field exists"""
+        mock_base_client.request.return_value = {
+            "success": True,
+            "data": [
+                {"key": "title", "field_type": "varchar"},
+            ],
+        }
+
+        result = await deal_client.get_deal_labels()
+        assert result == []
+
+    @pytest.mark.asyncio
+    async def test_get_deal_labels_empty_options(self, deal_client, mock_base_client):
+        """Test get_deal_labels when label field has no options"""
+        mock_base_client.request.return_value = {
+            "success": True,
+            "data": [
+                {"key": "label", "field_type": "enum", "options": None},
+            ],
+        }
+
+        result = await deal_client.get_deal_labels()
+        assert result == []
+
+    @pytest.mark.asyncio
+    async def test_create_deal_label_success(self, deal_client, mock_base_client):
+        """Test create_deal_label creates a new label option"""
+        mock_base_client.request.return_value = {
+            "success": True,
+            "data": [{"id": 4, "label": "Enterprise"}],
+        }
+
+        result = await deal_client.create_deal_label(label="Enterprise")
+
+        mock_base_client.request.assert_called_once_with(
+            "POST",
+            "/dealFields/label/options",
+            json_payload=[{"label": "Enterprise"}],
+        )
+        assert result["id"] == 4
+        assert result["label"] == "Enterprise"
+
+    @pytest.mark.asyncio
+    async def test_create_deal_label_empty_name(self, deal_client, mock_base_client):
+        """Test create_deal_label rejects empty label name"""
+        with pytest.raises(ValueError, match="cannot be empty"):
+            await deal_client.create_deal_label(label="")
+
+    @pytest.mark.asyncio
+    async def test_create_deal_label_too_long(self, deal_client, mock_base_client):
+        """Test create_deal_label rejects label name over 255 chars"""
+        with pytest.raises(ValueError, match="255"):
+            await deal_client.create_deal_label(label="x" * 256)
+
+    @pytest.mark.asyncio
+    async def test_create_deal_label_strips_whitespace(self, deal_client, mock_base_client):
+        """Test create_deal_label strips whitespace from label"""
+        mock_base_client.request.return_value = {
+            "success": True,
+            "data": [{"id": 5, "label": "VIP"}],
+        }
+
+        await deal_client.create_deal_label(label="  VIP  ")
+
+        mock_base_client.request.assert_called_once_with(
+            "POST",
+            "/dealFields/label/options",
+            json_payload=[{"label": "VIP"}],
+        )
