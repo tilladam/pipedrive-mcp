@@ -14,6 +14,7 @@ from pipedrive.api.features.organizations.client.organization_client import (
     OrganizationClient,
 )
 from pipedrive.api.features.persons.client.person_client import PersonClient
+from pipedrive.api.features.users.client.user_client import UserClient
 
 
 class PipedriveClient:
@@ -42,6 +43,7 @@ class PipedriveClient:
         self.item_search = ItemSearchClient(self.base_client)
         self.lead_client = LeadClient(self.base_client)
         self.activities = ActivityClient(self.base_client)
+        self.users = UserClient(self.base_client)
 
         logger.debug("PipedriveClient initialized.")
 
@@ -506,3 +508,9 @@ class PipedriveClient:
     async def get_lead_sources(self) -> List[Dict[str, Any]]:
         """Forward to lead client get_lead_sources method"""
         return await self.lead_client.get_lead_sources()
+
+    # --- User Methods (forwarding to users client) ---
+
+    async def get_user(self, user_id: int) -> Dict[str, Any]:
+        """Forward to users client get_user method"""
+        return await self.users.get_user(user_id=user_id)
