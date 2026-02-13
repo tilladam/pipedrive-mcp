@@ -14,6 +14,7 @@ from pipedrive.api.features.organizations.client.organization_client import (
     OrganizationClient,
 )
 from pipedrive.api.features.persons.client.person_client import PersonClient
+from pipedrive.api.features.pipelines.client.pipeline_client import PipelineClient
 from pipedrive.api.features.users.client.user_client import UserClient
 
 
@@ -43,6 +44,7 @@ class PipedriveClient:
         self.item_search = ItemSearchClient(self.base_client)
         self.lead_client = LeadClient(self.base_client)
         self.activities = ActivityClient(self.base_client)
+        self.pipelines = PipelineClient(self.base_client)
         self.users = UserClient(self.base_client)
 
         logger.debug("PipedriveClient initialized.")
