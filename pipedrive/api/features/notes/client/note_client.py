@@ -2,6 +2,7 @@
 from typing import Dict, List, Optional, Tuple, Any
 from pipedrive.api.base_client import BaseClient
 from pipedrive.api.features.notes.models.note import Note
+from pipedrive.api.features.notes.client.comment_client import CommentClient
 
 
 class NoteClient:
@@ -17,6 +18,7 @@ class NoteClient:
             base_client: The base HTTP client for API requests
         """
         self.base_client = base_client
+        self.comments = CommentClient(base_client)
 
     async def create_note(
         self,

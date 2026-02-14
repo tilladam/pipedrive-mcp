@@ -23,3 +23,16 @@ registry.register_tool("notes", get_note_from_pipedrive)
 registry.register_tool("notes", update_note_in_pipedrive)
 registry.register_tool("notes", delete_note_from_pipedrive)
 registry.register_tool("notes", list_notes_in_pipedrive)
+
+# Comment tools
+from .tools.comment_add_tool import add_comment_to_note_in_pipedrive
+from .tools.comment_get_tool import get_comment_on_note_from_pipedrive
+from .tools.comment_update_tool import update_comment_on_note_in_pipedrive
+from .tools.comment_delete_tool import delete_comment_on_note_from_pipedrive
+from .tools.comment_list_tool import list_comments_on_note_in_pipedrive
+
+registry.register_tool("notes", add_comment_to_note_in_pipedrive)
+registry.register_tool("notes", get_comment_on_note_from_pipedrive)
+registry.register_tool("notes", update_comment_on_note_in_pipedrive)
+registry.register_tool("notes", delete_comment_on_note_from_pipedrive)
+registry.register_tool("notes", list_comments_on_note_in_pipedrive)
